@@ -58,8 +58,8 @@ class DataSupplier(object):
             path2df = os.path.join(path2data, fname)
             self.data[dfName] = pd.read_pickle(path2df).sort_index()
 
-        self.data['glocuse'].index.names = ['ConnectionID', 'Timestamp']
-        self.data['glocuse'] = self.data['glocuse'].sort_index().groupby(level='ConnectionID').apply(resample)
+        self.data['glucose'].index.names = ['ConnectionID', 'Timestamp']
+        self.data['glucose'] = self.data['glucose'].sort_index().groupby(level='ConnectionID').apply(resample)
 
     def get_data(self, dfname, index=None):
         """
