@@ -1,24 +1,12 @@
 import numpy as np
 import pandas as pd
 import os
+from dataSupplier import DataSupplier
 
 # The time series that you would get are such that the difference
 # between two rows is 15 minutes. This is a global number that we
 # used to prepare the data, so you would need it for different purposes
 DATA_RESOLUTION_MIN = 15
-
-
-class DFMeta(object):
-    """
-    A class to hold meta data about the different dataframes
-    """
-    def __init__(self, fname, ts_field_name):
-        """
-        :param fname: file name of the dataframe
-        :param ts_field_name: column name for "timestamp" in this dataframe
-        """
-        self.fname = fname
-        self.ts_field_name = ts_field_name
 
 
 class Predictor(object):
@@ -36,22 +24,9 @@ class Predictor(object):
 
         self.path = path2data
 
-        self.dfs_meta = {
-            'glucose': DFMeta('GlucoseValues.df', 'Timestamp'),
-            'exercises': DFMeta('Exercises.df', 'Timestamp'),
-            'meals': DFMeta('Meals.df', 'Timestamp'),
-            'sleep': DFMeta('Sleep.df', 'sleep_time'),
-            'test_food': DFMeta('TestFoods.df', 'Timestamp'),
-            'bac': DFMeta('BacterialSpecies.df', None),
-            'blood': DFMeta('BloodTests.df', None),
-            'measurements': DFMeta('Measurements.df', None),
-        }
-
-        self.dfs = {}
-
         self.X = None
 
-        self.load_raw_data()
+        self.dataSupplier = DataSupplier(path2data)
 
     def predict(self, X):
         """ Given dataFrame of connection id and time stamp (X) predict
@@ -70,24 +45,6 @@ class Predictor(object):
 
         return y
 
-    def load_raw_data(self):
-        """ Loads raw dataframes from files, and does some basic cleaning """
-
-        # Arrange sequential data: re-sample each 15 min
-        def resample(x):
-            return x.reset_index(level=['ConnectionID'], drop=True). \
-                resample(str(DATA_RESOLUTION_MIN) + 'min', label='right').last().ffill()
-
-        for df_name, dfmeta in self.dfs_meta.items():
-            fname = dfmeta.fname
-            path2df = os.path.join(self.path, fname)
-            self.dfs[df_name] = pd.read_pickle(path2df).sort_index()
-
-        # fix glucose index names
-        self.dfs['glucose'].index.names = ['ConnectionID', 'Timestamp']
-
-        # fix timestamp indexes
-        self.dfs['glucose'] = self.dfs['glucose'].sort_index().groupby(level='ConnectionID').apply(resample)
 
     def build_features(self, X):
         """ Enhance the given table of X=(connectionIDs, timestamps) to a have more relevant data.

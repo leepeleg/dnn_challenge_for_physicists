@@ -61,11 +61,12 @@ class DataSupplier(object):
         self.data['glocuse'].index.names = ['ConnectionID', 'Timestamp']
         self.data['glocuse'] = self.data['glocuse'].sort_index().groupby(level='ConnectionID').apply(resample)
 
-    def get_data(self, dfname, index = None):
+    def get_data(self, dfname, index=None):
         """
         returns a sub-dataFrame of requested kind for specified indices
         :param dfname: name of the data frame to return 
         :param index: specfic indices requested. If not specfied, return the entire table
         :return: dataFrame
         """
+        # TODO: implement get_data function
         return self.data[dfname]

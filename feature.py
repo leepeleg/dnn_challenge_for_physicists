@@ -1,4 +1,5 @@
-from dataSupplier import *
+from dataSupplier import DataSupplier
+import numpy as np
 
 
 class Feature(object):
